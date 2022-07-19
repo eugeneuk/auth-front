@@ -1,19 +1,42 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-
+import Login from "@/components/auth/login/Login";
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'login',
+    component: Login
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    path: '/register',
+    name: 'register',
+    component: () => import('@/components/auth/register/Register')
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('@/components/profile/Profile')
+  },
+  {
+    path: '/user',
+    name: 'user',
+    component: () => import('@/views/User'),
+    meta: { authRoute: true }
+  },
+  {
+    path: '/users',
+    name: 'users',
+    component: () => import('@/components/users/Users'),
+    meta: { authRoute: true }
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: () => import('@/components/auth/login/Logout'),
+  },
+  {
+    path: '/403',
+    name: '403',
+    component: () => import('@/components/errors/403'),
   }
 ]
 
@@ -21,5 +44,23 @@ const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 })
+
+// Middleware for auth routes
+router.beforeEach((to, from, next) => {
+  //if(to.meta.authRoute){
+  if(to.matched.some(record => record.meta.authRoute)){
+
+    if(!localStorage.getItem('_token')){
+      next({
+        name: "/login"
+      })
+    }else{
+      next();
+    }
+
+  } else {
+    next();
+  }
+});
 
 export default router
